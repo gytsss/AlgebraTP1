@@ -13,10 +13,11 @@ const int maxVecQty=4;
 
 Vector2 vectorIntersection(Vector vector1, Vector vector2);
 void DrawVector(Vector v1, Color color);
-void CheckAngles(Vector vectors[], bool isIntersection[maxVecQty][maxVecQty], float intersectionAngles[maxVecQty][maxVecQty]);
-Vector2 NextValue(bool isIntersection[maxVecQty][maxVecQty], int id);
-void CheckForQuadrilater(Vector vectors[],bool isIntersection[maxVecQty][maxVecQty],float intersectionAngles[maxVecQty][maxVecQty] );
+void CheckAngles(Vector vectors[], float intersectionAngles[maxVecQty][maxVecQty]);
+Vector2 NextValue(int id);
+void CheckForQuadrilater(Vector vectors[],float intersectionAngles[maxVecQty][maxVecQty] );
 void SortVector(Vector& vector);
+static Vector2 intersectionPoints[maxVecQty][maxVecQty];
 int main()
 {
     
@@ -28,9 +29,9 @@ int main()
 
     Color colors[maxVecQty]={WHITE, RED, GREEN, BLUE};
     
-    Vector2 intersectionPoints[maxVecQty][maxVecQty];
+    
     float intersectionAngles[maxVecQty][maxVecQty];
-    bool isIntersection[maxVecQty][maxVecQty];
+    
     
     for (int i = 0; i < maxVecQty; ++i)
     {
@@ -55,15 +56,16 @@ int main()
         for (int i = 0; i < maxVecQty; ++i)
         {
             //j=i para que no vuelva a hacer chequeos que ya se hicieron
-            for (int j = i; j < maxVecQty; ++j)
+            for (int j = 0; j < maxVecQty; ++j)
             {
                 if (i != j)
+                {
                     intersectionPoints[i][j] = vectorIntersection(vectors[i], vectors[j]);
-                isIntersection[i][j] = intersectionPoints[i][j].x > 0;
+                }
             }
         }
-        CheckAngles(vectors, isIntersection, intersectionAngles);
-        CheckForQuadrilater(vectors, isIntersection, intersectionAngles);
+        CheckAngles(vectors, intersectionAngles);
+        CheckForQuadrilater(vectors, intersectionAngles);
         for (int i = 0; i < maxVecQty; ++i)
         {
             DrawVector(vectors[i], colors[i]);
@@ -75,25 +77,24 @@ int main()
     return 0;
 }
 
-Vector2 NextValue(bool isIntersection[maxVecQty][maxVecQty], int id)
+Vector2 NextValue(int id)
 {
     for (int i = id; i < maxVecQty; ++i)
     {
         for (int j = i; j < maxVecQty; ++j)
         {
-            if (isIntersection[i][j])
+            if (intersectionPoints[i][j].x >= 0)
                 return {(float)i,(float)j};
         }
     }
     return {-1,-1};
 }
 
-void CheckForQuadrilater(Vector vectors[],bool isIntersection[maxVecQty][maxVecQty],float intersectionAngles[maxVecQty][maxVecQty] )
+void CheckForQuadrilater(Vector vectors[], float intersectionAngles[maxVecQty][maxVecQty] )
 {
     float angle=0;
     int count1=0;
     Vector2 points[4];
-   
     
     for (int j = 0; j < maxVecQty; ++j)
     {
@@ -107,7 +108,7 @@ void CheckForQuadrilater(Vector vectors[],bool isIntersection[maxVecQty][maxVecQ
         
         for (int m = 0; m < 4; ++m)
         {
-            points[count1] = NextValue(isIntersection, j + m);
+            points[count1] = NextValue(j + m);
             if (points[count1].x > -1)
                 count1++;
             if (count1 == 4)
@@ -132,7 +133,7 @@ void DrawVector(Vector v1, Color color)
 
 Vector2 vectorIntersection(Vector vector1, Vector vector2)
 {
-    /*
+    
     // linea del vector1 de from a to representado como a1x + b1y = c1
     float a1 = vector1.to.y - vector1.from.y;
     float b1 = vector1.from.x - vector1.to.x;
@@ -154,26 +155,56 @@ Vector2 vectorIntersection(Vector vector1, Vector vector2)
     {
         float x = (b2*c1 - b1*c2)/determinant;
         float y = (a1*c2 - a2*c1)/determinant;
-        return {x, y};
+        float a,b,c,d;
+        if(vector1.from.x < vector1.to.x)
+        {
+            a = vector1.from.x;
+            b = vector1.to.x;
+        }
+        else
+        {
+            a = vector1.to.x;
+            b = vector1.from.x;
+        }
+        if(vector1.from.y < vector1.to.y)
+        {
+            c = vector1.from.y;
+            d = vector1.to.y;
+        }
+        else
+        {
+            c = vector1.to.y;
+            d = vector1.from.y;
+        }
+        if(a <= x && x <= b && c <= y && y <= d)
+        {
+            return {x, y};
+            
+        }
+        else
+        {
+            //INTERSECTION OUT OF BOUNDS
+            return{-3,-3};
+        }
         
-    }
-    */
+    }/*
+    
     Vector2 result;
     // punto de interseccion en X
     result.x = ((vector1.from.x * vector1.to.y - vector1.from.y * vector1.to.x) * (vector2.from.x - vector2.to.x) - (vector1.from.x - vector1.to.x) * (vector2.from.x * vector2.to.y - vector2.from.y * vector2.to.x)) / ((vector1.from.x - vector1.to.x) * (vector2.from.y - vector2.to.y) - (vector1.from.y - vector1.to.y) * (vector2.from.x - vector2.to.x));
 
     // punto de interseccion en Y
     result.y = ((vector1.from.x * vector1.to.y - vector1.from.y * vector1.to.x) * (vector2.from.y - vector2.to.y) - (vector1.from.y - vector1.to.y) * (vector2.from.x * vector2.to.y - vector2.from.y * vector2.to.x)) / ((vector1.from.x - vector1.to.x) * (vector2.from.y - vector2.to.y) - (vector1.from.y - vector1.to.y) * (vector2.from.x - vector2.to.x));
-    return result;
+    return result;*/
 }
 
-void CheckAngles(Vector vectors[], bool isIntersection[maxVecQty][maxVecQty],float intersectionAngles[maxVecQty][maxVecQty] )
+void CheckAngles(Vector vectors[],float intersectionAngles[maxVecQty][maxVecQty] )
 {
     for (int i = 0; i < maxVecQty; ++i)
     {
         for (int j = 0; j < maxVecQty; ++j)
         {
-            if(isIntersection[i][j])
+            if(intersectionPoints[i][j].x >= 0)
             {
                 /*
                 float m1 = (vectors[i].to.y - vectors[i].from.y)/(vectors[i].to.x - vectors[i].from.x);
@@ -181,6 +212,7 @@ void CheckAngles(Vector vectors[], bool isIntersection[maxVecQty][maxVecQty],flo
                 intersectionAngles[i][j] = atan(abs((m2-m1)/(1+m2*m1)));
                 intersectionAngles[i][j] *= 180 / acos(-1.0f);
                 */
+               
                 double a = (vectors[i].to.x - vectors[i].from.x) * (vectors[j].to.x - vectors[j].from.x);
                 double b = (vectors[i].to.y - vectors[i].from.y) * (vectors[j].to.y - vectors[j].from.y);
                 double c = sqrt((vectors[i].to.x-vectors[i].from.x)*(vectors[i].to.x-vectors[i].from.x)+(vectors[i].to.x-vectors[i].from.x)*(vectors[i].to.x-vectors[i].from.x));
