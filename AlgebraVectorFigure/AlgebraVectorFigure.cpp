@@ -128,7 +128,7 @@ void CheckForQuadrilater(Vector vectors[], float intersectionAngles[maxVecQty][m
 
 void DrawVector(Vector v1, Color color)
 {
-    DrawLine(v1.from.x,v1.from.y, v1.to.x, v1.to.y, color);
+    DrawLine(static_cast<int>(v1.from.x),static_cast<int>(v1.from.y), static_cast<int>(v1.to.x), static_cast<int>(v1.to.y), color);
 }
 
 Vector2 vectorIntersection(Vector vector1, Vector vector2)
