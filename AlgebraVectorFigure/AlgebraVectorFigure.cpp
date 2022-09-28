@@ -32,7 +32,7 @@ void CheckAngles(Vector vectors[], float intersectionAngles[maxVectors][maxVecto
 Vector2 NextValue(int id);
 void CheckForQuadrilater(Vector vectors[], float intersectionAngles[maxVectors][maxVectors]);
 void SortVector(Vector& vector);
-void go(int offset, int k);
+void CreateCombinations(int offset, int k);
 bool isUnique(Angle anglesI[][maxVectors], Angle angle);
 void SumOfPoint(Angle anglesCombination[][maxVectors]);
 
@@ -96,7 +96,7 @@ int main()
             }
         }
     }
-    go(0, k);
+    CreateCombinations(0, k);
     SumOfPoint(pointCombinations);
     while (!WindowShouldClose())
     {
@@ -303,22 +303,37 @@ void PrintCombination(const vector<int>& v)
 
 int positionI = 0;
 int positionJ = 0;
-
-void go(int offset, int k)
+void CreateCombinations(int offset, int k)
 {
-    if (k == 0)
+    /*
+    if (k == 0) //SI K = 0 YA NO HAY MAS COMBINACIONES PARA HACER
     {
         return;
     }
+    //angles CONTIENE TODOS LOS ANGULOS ENCONTRADOS
     for (int i = offset; i <= angles.size() - k; ++i)
     {
+        //isUnique -> SI NO SE REPITE EL NUMERO EN LA COMBINACION ACTUAL ES TRUE
         if (isUnique(pointCombinations, angles[i]))
         {
+            //
             pointCombinations[positionI][positionJ % 4] = angles[i];
-            positionJ++;
-            positionI += positionJ % 4 == 0 ? 1 : 0;
+            
         }
-        go(i + 1, k - 1);
+        CreateCombinations(i + 1, k - 1);
+    }
+    */
+    for (int i = 0; i < 126; ++i)
+    {
+        for (int j = i+1; j < maxVectors; ++j)
+        {
+            if(i!=j && isUnique(pointCombinations, angles[i]))
+            {
+                pointCombinations[positionI][positionJ] = angles[i];
+                positionJ++;
+                positionI += positionJ % 4 == 0 ? 1 : 0;
+            }
+        }
     }
 }
 
