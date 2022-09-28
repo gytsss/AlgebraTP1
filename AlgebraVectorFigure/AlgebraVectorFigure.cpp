@@ -1,8 +1,12 @@
 #include <iostream>
 #include "raylib.h"
+
 #include "raymath.h"
 #include "cmath"
 
+#include <vector>
+
+using namespace std;
 
 struct Vector
 {
