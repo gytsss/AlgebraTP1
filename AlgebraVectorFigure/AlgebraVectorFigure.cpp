@@ -10,9 +10,10 @@ struct Vector
     Vector2 to;
 };
 
-const int maxVectors=4;
+constexpr int maxVectors = 4;
 
-
+vector<float> angles;
+vector<int> combination;
 Vector2 vectorIntersection(Vector vector1, Vector vector2);
 void DrawVector(Vector v1, Color color);
 void CheckAngles(Vector vectors[], float intersectionAngles[maxVectors][maxVectors]);
@@ -20,6 +21,8 @@ Vector2 NextValue(int id);
 void CheckForQuadrilater(Vector vectors[],float intersectionAngles[maxVectors][maxVectors] );
 void SortVector(Vector& vector);
 static Vector2 intersectionPoints[maxVectors][maxVectors];
+void AngleCombination(float pointCombination[], float intersectionAngles[][maxVectors]);
+void go(int offset, int k);
 
 int main()
 {
@@ -41,41 +44,58 @@ int main()
     {
         for (int j = 0; j < maxVectors; ++j)
         {
-            intersectionPoints[i][j] = {-1,-1};
+            intersectionPoints[i][j] = {-1, -1};
+            intersectionAngles[i][j] = {-1};
         }
     }
-    
 
+    int n = 12, k = 4;
+
+    for (int i = 0; i < maxVectors; ++i)
+    {
+        SortVector(vectors[i]);
+    }
+    //CHEQUEA TODOS LOS PUNTOS DE COLISION
+    for (int i = 0; i < maxVectors; ++i)
+    {
+        for (int j = i + 1; j < maxVectors; ++j)
+        {
+            if (i != j)
+            {
+                intersectionPoints[i][j] = vectorIntersection(vectors[i], vectors[j]);
+            }
+        }
+    }
+
+    CheckAngles(vectors, intersectionAngles);
+    CheckForQuadrilater(vectors, intersectionAngles);
+
+    for (int i = 0; i < maxVectors; ++i)
+    {
+        for (int j = 0; j < maxVectors; ++j)
+        {
+            if (intersectionAngles[i][j]>0 && intersectionAngles[i][j] < 180 )
+            {
+                angles.push_back(intersectionAngles[i][j]);
+                if((180-intersectionAngles[i][j]) >=1)
+                {
+                    angles.push_back((180-intersectionAngles[i][j]));
+                }
+            }
+        }
+    }
+    go(0, k);
+    
     while (!WindowShouldClose())
     {
         BeginDrawing();
         ClearBackground(BLACK);
-        
-        for (int i = 0; i < maxVectors; ++i)
-        {
-            SortVector(vectors[i]);
-        }
-        //CHEQUEA TODOS LOS PUNTOS DE COLISION
-        for (int i = 0; i < maxVectors; ++i)
-        {
-            //j=i para que no vuelva a hacer chequeos que ya se hicieron
 
-            for (int j = 0; j < maxVectors; ++j)
-            for (int j = i + 1; j < maxVectors; ++j)
-            {
-                if (i != j)
-                {
-                    intersectionPoints[i][j] = vectorIntersection(vectors[i], vectors[j]);
-                }
-            }
-        }
-        CheckAngles(vectors, intersectionAngles);
-        CheckForQuadrilater(vectors, intersectionAngles);
         for (int i = 0; i < maxVectors; ++i)
         {
             DrawVector(vectors[i], colors[i]);
         }
-        
+
         EndDrawing();
     }
     CloseWindow();
@@ -89,64 +109,73 @@ Vector2 NextValue(int id)
         for (int j = i; j < maxVectors; ++j)
         {
             if (intersectionPoints[i][j].x >= 0)
-                return {(float)i,(float)j};
+                return {static_cast<float>(i), static_cast<float>(j)};
         }
     }
-    return {-1,-1};
+    return {-1, -1};
 }
 
 void CheckForQuadrilater(Vector vectors[], float intersectionAngles[maxVectors][maxVectors] )
 {
-    float angle=0;
-    int count1=0;
+    float angle = 0;
+    int count1 = 0;
     Vector2 points[4];
-    
+
     for (int j = 0; j < maxVectors; ++j)
     {
         count1 = 0;
         angle = 0;
-        
+
         for (int i = 0; i < maxVectors; ++i)
         {
             points[i] = {-1, -1};
         }
-        
+
         for (int m = 0; m < 4; ++m)
         {
             points[count1] = NextValue(j + m);
             if (points[count1].x > -1)
+            {
                 count1++;
+            }
             if (count1 == 4)
+            {
                 break;
+            }
         }
-        
+
         for (int i = 0; i < maxVectors; ++i)
         {
-            if (intersectionAngles[(int)points[i].x][(int)points[i].y]<180)
-                angle += intersectionAngles[(int)points[i].x][(int)points[i].y];
-            if ((int)angle==360)
+            if (intersectionAngles[static_cast<int>(points[i].x)][static_cast<int>(points[i].y)] < 180)
+            {
+                angle += intersectionAngles[static_cast<int>(points[i].x)][static_cast<int>(points[i].y)];
+            }
+            if (static_cast<int>(angle) == 360)
+            {
                 break;
+            }
         }
     }
-    
 }
 
 void DrawVector(Vector v1, Color color)
 {
+
     DrawLine(static_cast<int>(v1.from.x),static_cast<int>(v1.from.y), static_cast<int>(v1.to.x), static_cast<int>(v1.to.y), color);
     DrawLineEx(v1.from, v1.to, 0.5,color);
+    DrawLine(static_cast<int>(v1.from.x), static_cast<int>(v1.from.y), static_cast<int>(v1.to.x),
+             static_cast<int>(v1.to.y), color);
 }
 
 Vector2 vectorIntersection(Vector vector1, Vector vector2)
 {
-
-    // linea del vector1 de from a to representado como a1x + b1y = c1
      //linea del vector1 de from a to representado como a1x + b1y = c1
     float a1 = vector1.to.y - vector1.from.y;
     float b1 = vector1.from.x - vector1.to.x;
     float c1 = a1 * (vector1.from.x) + b1 * (vector1.from.y);
 
-    // Linea del vector2 represented as a2x + b2y = c2
+
+    // linea del vector2 representado como a2x + b2y = c2
     float a2 = vector2.to.y - vector2.from.y;
     float b2 = vector2.from.x - vector2.to.x;
     float c2 = a2 * (vector2.from.x) + b2 * (vector2.from.y);
@@ -163,7 +192,6 @@ Vector2 vectorIntersection(Vector vector1, Vector vector2)
         float x = (b2 * c1 - b1 * c2) / determinant;
         float y = (a1 * c2 - a2 * c1) / determinant;
         float a, b, c, d;
-
         if (vector1.from.x < vector1.to.x)
         {
             a = vector1.from.x;
@@ -187,7 +215,6 @@ Vector2 vectorIntersection(Vector vector1, Vector vector2)
         if (a <= x && x <= b && c <= y && y <= d)
         {
             return { x, y };
-
         }
         else
         {
@@ -215,11 +242,11 @@ void CheckAngles(Vector vectors[],float intersectionAngles[maxVectors][maxVector
         {
             if (intersectionPoints[i][j].x >= 0)
             {
-               /* 
-                float m1 = (vectors[i].to.y - vectors[i].from.y)/(vectors[i].to.x - vectors[i].from.x);
-                float m2 = (vectors[j].to.y - vectors[j].from.y)/(vectors[j].to.x - vectors[j].from.x);
-                intersectionAngles[i][j] = atan(abs((m2-m1)/(1+m2*m1)));
-                intersectionAngles[i][j] *= 180 / acos(-1.0f);*/
+                /* 
+                 float m1 = (vectors[i].to.y - vectors[i].from.y)/(vectors[i].to.x - vectors[i].from.x);
+                 float m2 = (vectors[j].to.y - vectors[j].from.y)/(vectors[j].to.x - vectors[j].from.x);
+                 intersectionAngles[i][j] = atan(abs((m2-m1)/(1+m2*m1)));
+                 intersectionAngles[i][j] *= 180 / acos(-1.0f);*/
 
                 float x1 = vectors[i].to.x - vectors[i].from.x;
                 float x2 = vectors[j].to.x - vectors[j].from.x;
@@ -232,30 +259,23 @@ void CheckAngles(Vector vectors[],float intersectionAngles[maxVectors][maxVector
                 float angle = acos(dotProduct / module) * 180 / PI;
                 
                 intersectionAngles[i][j] = angle;
-                
-               
-               /* double a = (vectors[i].to.x - vectors[i].from.x) * (vectors[j].to.x - vectors[j].from.x);
-                double b = (vectors[i].to.y - vectors[i].from.y) * (vectors[j].to.y - vectors[j].from.y);
-                double c = sqrt((vectors[i].to.x-vectors[i].from.x)*(vectors[i].to.x-vectors[i].from.x)+(vectors[i].to.x-vectors[i].from.x)*(vectors[i].to.x-vectors[i].from.x));
-                double d = sqrt((vectors[j].to.x-vectors[j].from.x)*(vectors[j].to.x-vectors[j].from.x)+(vectors[j].to.x-vectors[j].from.x)*(vectors[j].to.x-vectors[j].from.x));
-                
-                intersectionAngles[i][j] = ((acos((float)((a + b) / (c * d))))) * 180 / PI;*/
-                
             }
         }
     }
 }
 
+
+//COPIADO DE CAVE
 void SortVector(Vector& vector)
 {
     if (vector.to.x < vector.from.x)
     {
-        float savex = vector.from.x;
+        float auxX = vector.from.x;
         vector.from.x = vector.to.x;
-        vector.to.x = savex;
-        float savey = vector.from.y;
+        vector.to.x = auxX;
+        float auxY = vector.from.y;
         vector.from.y = vector.to.y;
-        vector.to.y = savey;
+        vector.to.y = auxY;
     }
     else if (vector.from.x == vector.to.x)
     {
@@ -265,5 +285,29 @@ void SortVector(Vector& vector)
             vector.from.y = vector.to.y;
             vector.to.y = savey;
         }
+    }
+}
+
+
+void pretty_print(const vector<int>& v)
+{
+    static int count = 0;
+    cout << "combination no " << (++count) << ": [ ";
+    for (int i = 0; i < v.size(); ++i) { cout << v[i] << " "; }
+    cout << "] " << endl;
+}
+
+void go(int offset, int k)
+{
+    if (k == 0)
+    {
+        pretty_print(combination);
+        return;
+    }
+    for (int i = 12; i <= angles.size() - k; ++i)
+    {
+        combination.push_back(angles[i]);
+        go(i + 1, k - 1);
+        combination.pop_back();
     }
 }
