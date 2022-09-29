@@ -1,3 +1,8 @@
+//Tp 1 Algebra
+//Barra Santiago
+//Godoy Tobias
+//Monti Matias 
+
 #include <iostream>
 #include "raylib.h"
 #include "raymath.h"
@@ -15,25 +20,43 @@ struct Vector
 struct Angle
 {
     float angle;
-    int ap1; //angle point 1
-    int ap2; //angle point 2
+    int id1; //angle point 1
+    int id2; //angle point 2
 };
 
 constexpr int maxVectors = 4;
 
+//vector para todos los angulos encontrados
 vector<Angle> angles;
-vector<int> combination;
+
+//array para los puntos de interseccion
 static Vector2 intersectionPoints[maxVectors][maxVectors];
+
+//array para todas las combinaciones de angulos posibles
 static Angle pointCombinations[126][maxVectors];
+
+//array para calcular que 4 angulos suman 360 grados
 Angle anglesUsed[maxVectors];
+
+//Calcula el punto de interseccion entre 2 vectores
 Vector2 vectorIntersection(Vector vector1, Vector vector2);
+
+//Dibuja los vectores
 void DrawVector(Vector v1, Color color);
+
+//Calcula los angulos teniendo en cuenta el punto de interseccion
 void CheckAngles(Vector vectors[], float intersectionAngles[maxVectors][maxVectors]);
-Vector2 NextValue(int id);
-void CheckForQuadrilater(Vector vectors[], float intersectionAngles[maxVectors][maxVectors]);
+
+//Ordena de menor a mayor un vector
 void SortVector(Vector& vector);
+
+// "Crea todas las combinaciones posibles entre angulos"
 void CreateCombinations(int offset, int k);
+
+//Condicion para la combinacion de puntos, si el id ya esta en la combinacion retorna false
 bool isUnique(Angle anglesI[][maxVectors], Angle angle);
+
+//"Usa la combinacion de angulos para chequear si suman 360"
 void SumOfPoint(Angle anglesCombination[][maxVectors]);
 
 int main()
@@ -41,6 +64,7 @@ int main()
     InitWindow(720 * 1.5f, 480 * 1.5f, "algebra");
 
     Vector vectors[maxVectors];
+    //Creacion de vectores
     vectors[0] = {{150.0f, 500.0f}, {170.0f, 75.0f}};
     vectors[1] = {{100.0f, 200.0f}, {500.0f, 200.0f}};
     vectors[2] = {{340.0f, 70.0f}, {450.0f, 500.0f}};
@@ -48,20 +72,17 @@ int main()
 
     Color colors[maxVectors] = {WHITE, RED, GREEN, BLUE};
 
-
     float intersectionAngles[maxVectors][maxVectors];
-
 
     for (int i = 0; i < maxVectors; ++i)
     {
         for (int j = 0; j < maxVectors; ++j)
         {
-            intersectionPoints[i][j] = {-1, -1};
-            intersectionAngles[i][j] = {-1};
+            intersectionPoints[i][j] = {-1, -1};  //el -1 declara que esta vacio
+            intersectionAngles[i][j] = -1;
         }
     }
 
-    int n = 12, k = 4;
 
     for (int i = 0; i < maxVectors; ++i)
     {
@@ -80,7 +101,6 @@ int main()
     }
 
     CheckAngles(vectors, intersectionAngles);
-    CheckForQuadrilater(vectors, intersectionAngles);
 
     for (int i = 0; i < maxVectors; ++i)
     {
@@ -88,15 +108,17 @@ int main()
         {
             if (intersectionAngles[i][j] > 0 && intersectionAngles[i][j] < 180)
             {
-                angles.push_back({intersectionAngles[i][j], i, j});
+                angles.push_back({intersectionAngles[i][j], i, j}); //No pueden ser del mismo id
+
                 if ((180 - intersectionAngles[i][j]) >= 1)
                 {
-                    angles.push_back({(180 - intersectionAngles[i][j]), i, j});
+                    angles.push_back({(180 - intersectionAngles[i][j]), i, j}); //Sacar el segundo angulo
                 }
             }
         }
     }
-    CreateCombinations(0, k);
+    
+    CreateCombinations(0, maxVectors);
     SumOfPoint(pointCombinations);
     while (!WindowShouldClose())
     {
@@ -135,49 +157,6 @@ Vector2 NextValue(int id)
         }
     }
     return {-1, -1};
-}
-
-void CheckForQuadrilater(Vector vectors[], float intersectionAngles[maxVectors][maxVectors])
-{
-    float angle = 0;
-    int count1 = 0;
-    Vector2 points[4];
-
-    for (int j = 0; j < maxVectors; ++j)
-    {
-        count1 = 0;
-        angle = 0;
-
-        for (int i = 0; i < maxVectors; ++i)
-        {
-            points[i] = {-1, -1};
-        }
-
-        for (int m = 0; m < 4; ++m)
-        {
-            points[count1] = NextValue(j + m);
-            if (points[count1].x > -1)
-            {
-                count1++;
-            }
-            if (count1 == 4)
-            {
-                break;
-            }
-        }
-
-        for (int i = 0; i < maxVectors; ++i)
-        {
-            if (intersectionAngles[static_cast<int>(points[i].x)][static_cast<int>(points[i].y)] < 180)
-            {
-                angle += intersectionAngles[static_cast<int>(points[i].x)][static_cast<int>(points[i].y)];
-            }
-            if (static_cast<int>(angle) == 360)
-            {
-                break;
-            }
-        }
-    }
 }
 
 void DrawVector(Vector v1, Color color)
@@ -234,9 +213,10 @@ Vector2 vectorIntersection(Vector vector1, Vector vector2)
             c = vector1.to.y;
             d = vector1.from.y;
         }
+
         if (a <= x && x <= b && c <= y && y <= d)
         {
-            return {x, y};
+            return {x, y}; //Devuelve las coords del punto de interseccion
         }
         else
         {
@@ -254,6 +234,8 @@ void CheckAngles(Vector vectors[], float intersectionAngles[maxVectors][maxVecto
         {
             if (intersectionPoints[i][j].x >= 0)
             {
+                //Se calcula el angulo con el dot product o producto punto/escalar
+
                 float x1 = vectors[i].to.x - vectors[i].from.x;
                 float x2 = vectors[j].to.x - vectors[j].from.x;
                 float y1 = vectors[i].to.y - vectors[i].from.y;
@@ -262,6 +244,7 @@ void CheckAngles(Vector vectors[], float intersectionAngles[maxVectors][maxVecto
                 float dotProduct = x1 * x2 + y1 * y2;
 
                 float module = (sqrt(pow(x1, 2) + pow(y1, 2)) * (sqrt(pow(x2, 2) + pow(y2, 2))));
+                //CAH = acoseno (adyacente / hipotenusa)
                 float angle = acos(dotProduct / module) * 180 / PI;
 
                 intersectionAngles[i][j] = angle;
@@ -269,7 +252,6 @@ void CheckAngles(Vector vectors[], float intersectionAngles[maxVectors][maxVecto
         }
     }
 }
-
 
 void SortVector(Vector& vector)
 {
@@ -358,7 +340,7 @@ bool isUnique(Angle anglesI[][maxVectors], Angle angle)
 {
     for (int i = 0; i < maxVectors; ++i)
     {
-        if (anglesI[positionI][i].ap1 == angle.ap1 && anglesI[positionI][i].ap2 == angle.ap2)
+        if (anglesI[positionI][i].id1 == angle.id1 && anglesI[positionI][i].id2 == angle.id2)
         {
             return false;
         }
