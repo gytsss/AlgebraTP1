@@ -1,8 +1,7 @@
-# AlgebraVectorFigure
-algebra1_VectorQuadrilaterFigure
+Group members:
 
-Godoy Tobias
-
-Barra Santiago
-
-Monti Matias
+1-Godoy Tobias
+https://github.com/gytsss
+2-Barra Santiago
+https://github.com/BarraSantiago
+3-Monti Matias
