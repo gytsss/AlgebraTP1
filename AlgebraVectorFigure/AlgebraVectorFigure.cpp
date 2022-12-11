@@ -1,7 +1,6 @@
 //Tp 1 Algebra
 //Barra Santiago
 //Godoy Tobias
-//Monti Matias 
 
 #include <iostream>
 #include "raylib.h"
@@ -43,7 +42,7 @@ Angle anglesUsed[maxVectors];
 int figureID[maxVectors];
 
 //Id de las difentes formas pero ordenado
-int arrangedID[maxVectors];
+int sortID[maxVectors];
 
 //Calcula el punto de interseccion entre 2 vectores
 Vector2 vectorIntersection(Vector vector1, Vector vector2);
@@ -70,7 +69,7 @@ void SumOfPoint(Angle anglesCombination[][maxVectors]);
 float GetDistance(Vector2 v1, Vector2 v2);
 
 //Pasa la informacion de un array a otro
-void CopyArray(int oldArr[], int newArr[]);
+void CopyArray(int array[], int newArray[]);
 
 //Ordena un array
 void SortArray(int arr[]);
@@ -101,9 +100,9 @@ int main()
 	vectors[0] = { {150.0f, 500.0f}, {170.0f, 75.0f}, 1 };
 	vectors[1] = { {100.0f, 200.0f}, {500.0f, 200.0f}, 2 };
 	vectors[2] = { {340.0f, 70.0f}, {450.0f, 500.0f}, 3 };
-
-	vectors[3] = { {100.0f, 450.0f}, {500.0f, 450.0f}, 4 };  //vector para formar el cuadrilatero
-	//vectors[3] = { {100.0f, 450.0f}, {250.0f, 150}, 4 };       //vector para formar el triangulo
+	
+	//vectors[3] = { {100.0f, 450.0f}, {500.0f, 450.0f}, 4 };  //vector para formar el cuadrilatero
+	vectors[3] = { {100.0f, 450.0f}, {250.0f, 150}, 4 };       //vector para formar el triangulo
 
 	Color colors[maxVectors] = { WHITE, RED, GREEN, BLUE };
 
@@ -156,7 +155,8 @@ int main()
 
 				if ((180 - intersectionAngles[i][j]) >= 1)
 				{
-					angles.push_back({ (180 - intersectionAngles[i][j]), i, j }); //Sacar el segundo angulo
+					angles.push_back({ ( 180 - intersectionAngles[i][j]), i, j }); //Sacar el segundo angulo
+					
 				}
 			}
 		}
@@ -169,27 +169,27 @@ int main()
 
 
 
-	CopyArray(figureID, arrangedID);
+	CopyArray(figureID, sortID);
 
-	SortArray(arrangedID);
+	SortArray(sortID);
 
 	cout << "Figure intersections: ";
 
 	for (int i = 0; i < maxVectors; i++)
 	{
-		cout << arrangedID[i] << " ";
+		cout << sortID[i] << " ";
 	}
 
 	cout << "\n";
 
 
-	if (CheckQuadrilateral(arrangedID))
+	if (CheckQuadrilateral(sortID))
 	{
 		cout << "The figure is a quadrilateral\n";
 		QuadrilateralArea();
 	}
 
-	if (CheckTriangle(arrangedID))
+	if (CheckTriangle(sortID))
 	{
 		cout << "The figure is a triangle\n";
 		TriangleArea();
@@ -442,11 +442,11 @@ bool isUnique(Angle anglesI[][maxVectors], Angle angle)
 	return true;
 }
 
-void CopyArray(int oldArr[], int newArr[])
+void CopyArray(int array[], int newArray[])
 {
 	for (int i = 0; i < maxVectors; i++)
 	{
-		newArr[i] = oldArr[i];
+		newArray[i] = array[i];
 	}
 }
 
@@ -489,7 +489,7 @@ bool CompareID(int id1[], int id2[])
 
 bool CheckQuadrilateral(int id[])
 {
-	int quadrilateral[] = { 2, 2, 2, 2 };
+	int quadrilateral[4] = { 2, 2, 2, 2 };
 
 	return (CompareID(id, quadrilateral));
 }
@@ -506,11 +506,12 @@ float GetDistance(Vector2 v1, Vector2 v2)
 
 void TriangleArea()
 {
-	//distancia entre los puntos de collision
+	//distancia entre los puntos de collision 
+	//obtengo el area utilizando la formula de heron
+
 	float a = GetDistance(Vector2{ intersectionPoints[0][1].x,intersectionPoints[0][1].y }, Vector2{ intersectionPoints[1][3].x,intersectionPoints[1][3].y });
 	float b = GetDistance(Vector2{ intersectionPoints[1][3].x,intersectionPoints[1][3].y }, Vector2{ intersectionPoints[0][3].x,intersectionPoints[0][3].y });
 	float c = GetDistance(Vector2{ intersectionPoints[0][3].x,intersectionPoints[0][3].y }, Vector2{ intersectionPoints[0][1].x,intersectionPoints[0][1].y });
-
 
 	float s = ((a + b + c) / 2);
 
@@ -523,6 +524,7 @@ void TriangleArea()
 void QuadrilateralArea()
 {
 	//distancia entre los puntos de collision
+	//obtengo el area utilizando la formula de heron
 
 	float diagonal = GetDistance(Vector2{ intersectionPoints[0][1].x,intersectionPoints[0][1].y }, Vector2{ intersectionPoints[2][3].x,intersectionPoints[2][3].y });
 
@@ -540,8 +542,6 @@ void QuadrilateralArea()
 	float s2 = ((a2 + b2 + diagonal) / 2);
 
 	float areaTriangle2 = sqrt(s2 * ((s2 - a2) * (s2 - b2) * (s2 - diagonal)));
-
-
 
 
 	float area = areaTriangle1 + areaTriangle2;
