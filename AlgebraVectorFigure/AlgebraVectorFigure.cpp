@@ -89,6 +89,9 @@ void TriangleArea();
 //Calcula el area de un cuadrilatero cortandolo a la mitad
 void QuadrilateralArea();
 
+bool checkDorito(int id[]);
+
+void doritoArea();
 
 int main()
 {
@@ -97,12 +100,12 @@ int main()
 	Vector vectors[maxVectors];
 
 	//Creacion de vectores
-	vectors[0] = { {150.0f, 500.0f}, {170.0f, 75.0f}, 1 };
+	vectors[0] = { {170.0f, 190.0f}, {150.0f, 500.0f}, 1 };
 	vectors[1] = { {100.0f, 200.0f}, {500.0f, 200.0f}, 2 };
-	vectors[2] = { {340.0f, 70.0f}, {450.0f, 500.0f}, 3 };
-	
+	vectors[2] = { {100.0f, 190.0f}, {250.0f, 290.0f}, 3 };
+
 	//vectors[3] = { {100.0f, 450.0f}, {500.0f, 450.0f}, 4 };  //vector para formar el cuadrilatero
-	vectors[3] = { {100.0f, 450.0f}, {250.0f, 150}, 4 };       //vector para formar el triangulo
+	vectors[3] = { {100.0f, 450.0f}, {300.0f, 150}, 4 };       //vector para formar el triangulo
 
 	Color colors[maxVectors] = { WHITE, RED, GREEN, BLUE };
 
@@ -155,8 +158,8 @@ int main()
 
 				if ((180 - intersectionAngles[i][j]) >= 1)
 				{
-					angles.push_back({ ( 180 - intersectionAngles[i][j]), i, j }); //Sacar el segundo angulo
-					
+					angles.push_back({ (180 - intersectionAngles[i][j]), i, j }); //Sacar el segundo angulo
+
 				}
 			}
 		}
@@ -193,6 +196,12 @@ int main()
 	{
 		cout << "The figure is a triangle\n";
 		TriangleArea();
+	}
+
+	if (checkDorito(sortID))
+	{
+		cout << "The figure is a dorito\n";
+		doritoArea();
 	}
 
 
@@ -333,7 +342,10 @@ void CheckAngles(Vector vectors[], float intersectionAngles[maxVectors][maxVecto
 				intersectionAngles[i][j] = angle;
 
 				cout << "Angle " << i + 1 << " & " << j + 1 << ": " << angle << endl;
+
+
 			}
+
 		}
 	}
 }
@@ -418,7 +430,7 @@ void SumOfPoint(Angle anglesCombination[][maxVectors])
 		{
 			anglesUsed[j] = anglesCombination[i][j];
 			totalAngle += anglesCombination[i][j].angle;
-			
+
 
 		}
 
@@ -547,4 +559,53 @@ void QuadrilateralArea()
 	float area = areaTriangle1 + areaTriangle2;
 
 	cout << "The area of the quadrilateral is: " << area << "\n";
+}
+
+bool checkDorito(int id[])
+{
+	int dorito[4] = { 2, 2, 2, 2 };
+	int dorito2[4] = { 3, 3, 3, 3 };
+
+	return (CompareID(id, dorito) || CompareID(id, dorito2));
+}
+
+void doritoArea()
+{
+	float diagonal = GetDistance(Vector2{ intersectionPoints[1][3].x,intersectionPoints[1][3].y }, Vector2{ intersectionPoints[2][4].x,intersectionPoints[2][4].y });
+
+	float a1 = GetDistance(Vector2{ intersectionPoints[2][4].x,intersectionPoints[2][4].y }, Vector2{ intersectionPoints[1][2].x,intersectionPoints[1][2].y });
+	float b1 = GetDistance(Vector2{ intersectionPoints[1][2].x,intersectionPoints[1][2].y }, Vector2{ intersectionPoints[1][3].x,intersectionPoints[1][3].y });
+
+	float s1 = ((a1 + b1 + diagonal) / 2);
+
+	float areaTriangle1 = sqrt(s1 * ((s1 - a1) * (s1 - b1) * (s1 - diagonal)));
+
+
+	float a2 = GetDistance(Vector2{ intersectionPoints[2][4].x,intersectionPoints[2][4].y }, Vector2{ intersectionPoints[3][4].x,intersectionPoints[3][4].y });
+	float b2 = GetDistance(Vector2{ intersectionPoints[3][4].x,intersectionPoints[3][4].y }, Vector2{ intersectionPoints[1][3].x,intersectionPoints[1][3].y });
+
+	float s2 = ((a2 + b2 + diagonal) / 2);
+
+	float areaTriangle2 = sqrt(s2 * ((s2 - a2) * (s2 - b2) * (s2 - diagonal)));
+
+	float a3 = GetDistance(Vector2{ intersectionPoints[1][2].x,intersectionPoints[1][2].y }, Vector2{ intersectionPoints[2][3].x,intersectionPoints[2][3].y });
+	float b3 = GetDistance(Vector2{ intersectionPoints[2][3].x,intersectionPoints[2][3].y }, Vector2{ intersectionPoints[1][3].x,intersectionPoints[1][3].y });
+	float c3 = GetDistance(Vector2{ intersectionPoints[1][3].x,intersectionPoints[1][3].y }, Vector2{ intersectionPoints[1][2].x,intersectionPoints[1][2].y });
+
+	float s3 = ((a3 + b3 + c3) / 2);
+
+	float areaTriangle3 = sqrt(s3 * ((s3 - a3) * (s3 - b3) * (s3 - c3)));
+
+	float a4 = GetDistance(Vector2{ intersectionPoints[1][3].x,intersectionPoints[1][3].y }, Vector2{ intersectionPoints[3][4].x,intersectionPoints[3][4].y });
+	float b4 = GetDistance(Vector2{ intersectionPoints[3][4].x,intersectionPoints[3][4].y }, Vector2{ intersectionPoints[1][4].x,intersectionPoints[1][4].y });
+	float c4 = GetDistance(Vector2{ intersectionPoints[1][4].x,intersectionPoints[1][4].y }, Vector2{ intersectionPoints[1][3].x,intersectionPoints[1][3].y });
+
+	float s4 = ((a4 + b4 + c4) / 2);
+
+	float areaTriangle4 = sqrt(s4 * ((s4 - a4) * (a4 - b4) * (s4 - c4)));
+
+	float area = areaTriangle1 + areaTriangle2 + areaTriangle3 + areaTriangle4;
+
+
+	cout << "The area of the dorito is: " << area << "\n";
 }
